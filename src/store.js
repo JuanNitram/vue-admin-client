@@ -4,30 +4,19 @@ import axios from 'axios'
 
 Vue.use(Vuex)
 
-// Esto esta muy pillo
-
 export default new Vuex.Store({
 	state: {
-		status: '',
-		baseUrl:'http://localhost/ProjectX/public/api',
+		baseUrl: process.env.VUE_APP_API_URL,
 		token: localStorage.getItem('token') || '',
 		user : localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : {},
 		isLoading: false,
 	},
 	mutations: {
-		auth_request(state){
-			state.status = 'loading'
-		},
 		auth_success(state, data){
-			state.status = 'success'
 			state.token = data.token
 			state.user = data.user
 		},
-		auth_error(state){
-			state.status = 'error'
-		},
 		logout(state){
-			state.status = ''
 			state.token = ''
 			state.user = {}
 		},
@@ -38,15 +27,13 @@ export default new Vuex.Store({
 	actions: {
 		login({commit}, user){
 			return new Promise((resolve, reject) => {
-				commit('auth_request')
-				axios({url: this.state.baseUrl + '/admin/login', data: user, method: 'POST' })
+				axios({url: this.state.baseUrl + '/login', data: user, method: 'POST' })
 				.then(resp => {
 					if(resp.data.success){
 						const token = resp.data.data.token
 						const user = resp.data.data.admin
 						localStorage.setItem('token', token)
 						localStorage.setItem('user', JSON.stringify(user))
-						// Add the following line:
 						axios.defaults.headers.common['Authorization'] = token
 						commit('auth_success', {token: token, user:user})
 						resolve(resp)
@@ -55,27 +42,6 @@ export default new Vuex.Store({
 					}
 				})
 				.catch(err => {
-					commit('auth_error')
-					localStorage.removeItem('token')
-					reject(err)
-				})
-			})
-		},
-		register({commit}, user){
-			return new Promise((resolve, reject) => {
-				commit('auth_request')
-				axios({url: this.state + '/register', data: user, method: 'POST' })
-				.then(resp => {
-					const token = resp.data.token
-					const user = resp.data.user
-					localStorage.setItem('token', token)
-					// Add the following line:
-					axios.defaults.headers.common['Authorization'] = token
-					commit('auth_success', token, user)
-					resolve(resp)
-				})
-				.catch(err => {
-					commit('auth_error', err)
 					localStorage.removeItem('token')
 					reject(err)
 				})
@@ -92,7 +58,6 @@ export default new Vuex.Store({
 	},
 	getters : {
 		isLoggedIn: state => !!state.token,
-		authStatus: state => state.status,
 		isLoading: state => state.isLoading,
 	}
 })

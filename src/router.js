@@ -4,7 +4,6 @@ import store from './store.js'
 
 import Login from './views/auth/Login.vue'
 import Dashboard from './views/Dashboard.vue'
-// import Register from './views/auth/Register.vue'
 
 import Administradores from './views/administradores/Administradores.vue'
 import AdministradoresNuevo from './views/administradores/AdministradoresNuevo.vue'
@@ -14,6 +13,8 @@ import ProductosNuevo from './views/productos/ProductosNuevo.vue'
 
 import Sliders from './views/sliders/Sliders.vue'
 import SlidersNuevo from './views/sliders/SlidersNuevo.vue'
+
+import middlewares from './middlewares'
 
 Vue.use(Router)
 
@@ -30,14 +31,6 @@ let router = new Router({
         section: 'login'
       }
     },
-    // {
-    //   path: '/register',
-    //   name: 'register',
-    //   component: Register,
-    //   meta: {
-    //     title: 'Registro',
-    //   }
-    // },
     {
       path: '/dashboard',
       name: 'dashboard',
@@ -66,6 +59,16 @@ let router = new Router({
         requiresAuth: true,
         title: 'Nuevo Administrador',
         section: 'admins',
+      }
+    },
+    {
+      path: '/admins/edit/:id',
+      name: 'edit-admin',
+      component: AdministradoresNuevo,
+      meta: {
+        requiresAuth: true,
+        title: 'Editar Administrador',
+        section: 'admins'
       }
     },
     {
@@ -136,15 +139,20 @@ let router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  if(to.matched.some(record => record.meta.requiresAuth)) {
-    if (store.getters.isLoggedIn) {
+  let check = middlewares.checkSections(to);
+  if(check){
+    if(to.matched.some(record => record.meta.requiresAuth)) {
+      if (store.getters.isLoggedIn) {
+        next()
+        return
+      }
+      next('/login')
+    } else {
       next()
-      return
     }
-    next('/login')
   } else {
-    next()
+    console.log("No permisions");
   }
-})
+});
 
 export default router

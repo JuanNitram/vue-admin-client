@@ -13,7 +13,7 @@
 
         <v-list class="pt-0" dense>
             <v-divider></v-divider>
-            <v-list-tile avatar class="v-list-item" v-for="item in items" :key="item.title" :to="item.link" @click="isLoading">
+            <v-list-tile avatar class="v-list-item pt-1" v-for="item in items" :key="item.title" :to="item.link" @click="isLoading">
                 <v-list-tile-action>
                     <v-icon>{{ item.icon }}</v-icon>
                 </v-list-tile-action>
@@ -27,6 +27,7 @@
 
 <script>
 import eventBus from '../EventBus.js'
+import filters from '../filters.js'
 
 export default {
     data () {
@@ -34,13 +35,24 @@ export default {
             drawer: null,
             items: [
                 { title: 'Dashboard', icon: 'dashboard' , link: '/dashboard' },
-                { title: 'Administradores', icon: 'supervised_user_circle' , link:'/admins'},
-                { title: 'Sliders', icon: 'collections' , link:'/sliders'},
-                { title: 'Productos', icon: 'question_answer' , link:'/products'}
+                // { title: 'Administradores', icon: 'supervised_user_circle' , link:'/admins'},
+                // { title: 'Sliders', icon: 'collections' , link:'/sliders'},
+                // { title: 'Productos', icon: 'question_answer' , link:'/products'}
             ]
         }
     },
     created() {
+        let sections = this.$store.state.user.sections;
+        
+        sections.forEach(element => {
+            let section = {};
+            section.title = filters.capitalize(element.name);
+            section.icon = 'dashboard';
+            section.link = '/' + element.name;
+            section.icon = element.icon;
+            this.items.push(section);
+        });
+        
         eventBus.$on('show-side-bar', () => {
             this.drawer = !this.drawer;
         });

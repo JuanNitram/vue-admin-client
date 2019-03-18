@@ -7,13 +7,13 @@
                 </div>
                 <v-form ref="form" lazy-validation>
                     <div class="text-field-padding">
-                        <v-text-field outline v-model="email" label="E-mail" required/>
-                        <v-text-field outline v-model="password" label="Password" type="password" required/>
+                        <v-text-field outline v-model="email" label="E-mail" :rules="[rules.required]"/>
+                        <v-text-field outline v-model="password" label="Password" type="password" :rules="[rules.required, rules.min]"/>
                     </div>
                     <div class="text-xs-right">
                         <v-btn depressed large @click="login">
                             Login
-                                <v-progress-circular v-bind:class="{ d_none: !isLoading }" class="progress-fix" size="20" indeterminate/>
+                            <v-progress-circular v-bind:class="{ d_none: !isLoading }" class="progress-fix" size="20" indeterminate/>
                         </v-btn>
                     </div>
                 </v-form>
@@ -27,7 +27,12 @@ export default {
         return {
             email : "",
             password : "",
-            isLoading :false
+            isLoading :false,
+            rules: {
+                required: value => !!value || 'Required',
+                min: pass => pass.length >= 8 || 'Min 8 characters',
+
+            }
         }
     },
     created(){
@@ -35,16 +40,19 @@ export default {
     },
     methods: {
         login: function () {
-            this.isLoading = true;
-            let email = this.email
-            let password = this.password
-            this.$store.dispatch('login', { email, password })
-            .then(() => {
-                this.isLoading = false;
-                this.$router.push('/dashboard')
-            }).catch(err => {
-                console.log(err)
-            })
+            let isValid = this.$refs.form.validate();
+            if(isValid){
+                this.isLoading = true;
+                let email = this.email
+                let password = this.password
+                this.$store.dispatch('login', { email, password })
+                .then(() => {
+                    this.isLoading = false;
+                    this.$router.push('/dashboard')
+                }).catch(err => {
+                    console.log(err)
+                })
+            }
         }
     }
 }

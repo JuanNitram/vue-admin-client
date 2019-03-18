@@ -4,22 +4,27 @@ import Vuetify from 'vuetify'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import filters from './filters';
-import helpers from './helpers';
+import filters from './filters'
+import middlewares from './middlewares'
 
 for(let name in filters) {
     Vue.filter(name, filters[name]);
 }
 
 Vue.prototype.$http = Axios;
-Vue.use(Vuetify)
+Vue.use(Vuetify, {
+    theme:{
+        primary: '#222E66',
+    }
+})
+// Vue.use(Sortable)
+
+middlewares.validateSession();
 
 const token = localStorage.getItem('token')
 
 if (token)
     Vue.prototype.$http.defaults.headers.common['Authorization'] = token;
-
-helpers.checkSessionTime();
 
 Vue.config.productionTip = false
 

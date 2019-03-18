@@ -1,75 +1,41 @@
 <template>
     <div v-bind:class="{ d_none: this.$store.getters.isLoading }">
-        <Actionbar :component="'Administradores'"/>
+        <Actionbar :component="section"/>
         <v-layout row pa-2>
             <v-flex>
-                <v-card>
-                    <v-card-title>
-                        <v-spacer></v-spacer>
-                        <v-text-field
-                        v-model="search"
-                        append-icon="search"
-                        label="Search"
-                        single-line
-                        hide-details
-                        ></v-text-field>
-                    </v-card-title>
-                    <v-data-table
-                    :headers="headers"
-                    :items="items"
-                    :search="search"
-                    >
-                    <template slot="items" slot-scope="props">
-                        <td class="text-xs-left">{{ props.item.id }}</td>
-                        <td>{{ props.item.name }}</td>
-                        <td>{{ props.item.email }}</td>
-                        <td >{{ props.item.types_id }}</td>
-                    </template>
-                    <v-alert slot="no-results" :value="true" color="error" icon="warning">
-                        Your search for "{{ search }}" found no results.
-                    </v-alert>
-                </v-data-table>
-            </v-card>
+
+                <Table :headers="headers"/>
+
         </v-flex>
     </v-layout>
 </div>
 </template>
 
 <script>
-import Actionbar from '../../components/Actionbar'
+import Actionbar from '../../components/reusable/Actionbar'
+import Table from '../../components/reusable/Table'
 import eventBus from '../../EventBus.js'
 
 export default {
     components: {
-        Actionbar
+        Actionbar,
+        Table
     },
     data () {
         return {
-            search: '',
             headers: [
+                { text: '', align: 'middle', value: 'drag', sortable: false},
                 { text: 'Id', align: 'left', value: 'id'},
                 { text: 'Name', align:'middle', value: 'name' },
                 { text: 'Email', align:'middle', value: 'email' },
-                { text: 'Type', align:'middle', value: 'type' },
+                { text: 'Type', align:'middle', value: 'types_id' },
+                { text: 'Active', align:'middle', value: 'active' },
             ],
-            items: []
+            section: this.$route.meta.section,
         }
     },
     created(){
-        eventBus.$once('form-new', (component) => {
-            console.log(component);
-            if(component && component == 'Administradores')
-                this.$router.push('/admins/new')
-        });
-    },
-    mounted() {
-        this.$http(this.$store.state.baseUrl + '/admin/admins').then((response) => {
-            let res = response.data;
-            if(res.success){
-                this.items = res.data.admins;
-            }
-            this.$store.commit('setIsLoading', false);
-        });
+
     }
 }
 </script>
